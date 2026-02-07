@@ -1,17 +1,17 @@
 from models.clock import WorldClock
 from models.campaign import Campaign
 from models.realm import Realm
-from models.character import Character
 from views.campaign_view import CampaignMenu
 from views.character_view import CharacterMenu
 from views.realm_view import RealmMenu
+from models.user import User
+from models.character import Character
 
 class GuildQuestApp:
     def __init__(self):
         self.clock = WorldClock()
-        self.realms = {}      # {realm_id: RealmObject}
-        self.campaigns = []   # List of Campaign objects
-        self.characters = []  # List of Character objects
+        self.user = User(1)
+        self.realms = {}
         self.running = True
 
     def display_menu(self):
@@ -24,7 +24,6 @@ class GuildQuestApp:
 
     def run(self):
         print("Welcome to GuildQuest!")
-        # Optional: Initialize a default Realm or Character here
         self.seed_initial_data() 
 
         while self.running:
@@ -34,11 +33,11 @@ class GuildQuestApp:
 
     def handle_input(self, choice):
         if choice == "1":
-            CampaignMenu(self).run()
+            CampaignMenu(self.user, self.realms, self.clock).run()
         elif choice == "2":
-            RealmMenu(self).run()
+            RealmMenu(self.user).run()
         elif choice == "3":
-            CharacterMenu(self).run()
+            CharacterMenu(self.user).run()
         elif choice == "4":
             hours = int(input("How many hours to advance? "))
             self.clock.advance(hours * 60)
@@ -49,12 +48,15 @@ class GuildQuestApp:
 
     def seed_initial_data(self):
         # Quick setup so the game isn't empty on launch
-        tutorial_realm = Realm(realm_id='R1', name="Sky Haven", local_time_offset=0)
+        tutorial_realm = Realm(realm_id='R1', name="Sky Haven", local_time_offset=1440)
         self.realms["R1"] = tutorial_realm
         
         starter_campaign = Campaign(name="The First Journey")
-        self.campaigns.append(starter_campaign)
-        print("System Initialized: Default Realm and Campaign created.")
+        self.user.campaigns.append(starter_campaign)
+
+        starting_character = Character('Harold', 'Archer', 15)
+        self.user.characters.append(starting_character)
+        print("System Initialized: Default Realm, Campaign, and Character created.")
 
 if __name__ == "__main__":
     app = GuildQuestApp()

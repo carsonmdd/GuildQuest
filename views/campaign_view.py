@@ -1,12 +1,17 @@
 from models.campaign import Campaign
+from models.user import User
+from models.realm import Realm
+from models.clock import WorldClock
 class CampaignMenu:
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, user: User, realms: Realm, clock: WorldClock):
+        self.user = user
+        self.realms = realms
+        self.clock = clock
 
     def run(self):
         while True:
             print("\n--- Campaign Management ---")
-            for i, c in enumerate(self.app.campaigns):
+            for i, c in enumerate(self.user.campaigns):
                 print(f"{i+1}. {c.name} ({len(c.events)} Events)")
             print("a. Add Campaign | d. Delete | e. Edit | b. Back")
             
@@ -20,17 +25,15 @@ class CampaignMenu:
     def add_campaign(self):
         name = input("Enter new campaign name: ")
         if name:
-            from models.campaign import Campaign
-            new_campaign = Campaign(name)
-            self.app.campaigns.append(new_campaign)
+            self.user.add_campaign(name)
             print(f"Campaign '{name}' created!")
 
     def delete_campaign(self):
         idx_str = input("Enter the number of the campaign to delete: ")
         if idx_str.isdigit():
             idx = int(idx_str) - 1
-            if 0 <= idx < len(self.app.campaigns):
-                removed = self.app.campaigns.pop(idx)
+            if 0 <= idx < len(self.user.campaigns):
+                removed = self.user.remove_campaign(idx)
                 print(f"Archived '{removed.name}'.")
             else:
                 print("Invalid index.")
@@ -39,30 +42,64 @@ class CampaignMenu:
         idx_str = input("Enter the number of the campaign to rename: ")
         if idx_str.isdigit():
             idx = int(idx_str) - 1
-            if 0 <= idx < len(self.app.campaigns):
+            if 0 <= idx < len(self.user.campaigns):
                 new_name = input("Enter new name: ")
-                self.app.campaigns[idx].name = new_name
+                self.user.update_campaign(idx, new_name)
                 print("Campaign updated.")
 
     def manage_single_campaign(self, index: str):
-        campaign = self.app.campaigns[index]
+        campaign = self.user.campaigns[index]
         while True:
             print(f"\n--- {campaign.name} ---")
             for i, ev in enumerate(campaign.events):
-                # Requirement 6: Display World vs Local Time
-                world_t = self.app.clock.format_time(ev.start_time)
-                local_t = ev.realm.display_event_time(ev.start_time, self.app.clock)
-                print(f"  {i+1}. {ev.title} [{ev.realm.name}]")
+                world_t = self.clock.format_time(ev.start_time)
+                local_t = ev.realm.display_event_time(ev.start_time, self.clock)
+                print(f"  {i+1}. {ev.event_name} [{ev.realm.name}]")
                 print(f"     Time: {world_t} (Local: {local_t})")
 
-            print("\na. Add Event | r. Remove Event | b. Back")
+            print("\na. Add Event | r. Remove | e. Edit | b. Back")
             choice = input(">> ").lower()
             if choice == 'b': break
             elif choice == 'a': self.add_event(campaign)
+            elif choice == 'r': self.remove_event(campaign)
+            elif choice == 'e': self.edit_event(campaign)
 
     def add_event(self, campaign: Campaign):
         title = input("Event Title: ")
-        realm_id = input("Enter Realm Name: ") 
-        realm = next((r for r in self.app.realms.values() if r.name == realm_id), None)
+        name = input("Enter Realm Name: ") 
+        start_time = int(input("Event Start Time: "))
+        end_time = int(input("Event End Time: "))
+        characters = input("Event Characters (space spearated)").split()
+        realm = next((r for r in self.realms.values() if r.name == name), None)
+
+        existing_names = {char.name for char in self.user.characters}
+        missing = [name for name in characters if name not in existing_names]
+        if missing:
+            print(f"Error: The following characters do not exist: {', '.join(missing)}")
+            return
+        
         if realm:
-            campaign.add_quest_event(title, self.app.clock.total_minutes, realm)
+            campaign.add_quest_event(title, realm, start_time, end_time, characters)
+
+    def remove_event(self, campaign: Campaign):
+        idx_str = input("Enter the number of the event to delete: ")
+        if idx_str.isdigit():
+            idx = int(idx_str) - 1
+            if 0 <= idx < len(self.user.campaigns):
+                removed = campaign.remove_quest_event(idx)
+                print(f"Deleted '{removed.event_name}'.")
+            else:
+                print("Invalid index.")
+
+    def edit_event(self, campaign: Campaign):
+        idx_str = input("Enter the number of the event to edit: ")
+        if idx_str.isdigit():
+            idx = int(idx_str) - 1
+            if 0 <= idx < len(campaign.events):
+                new_name = input("Enter new name: ")
+                new_start_time = int(input("Enter new start time: "))
+                new_end_time = int(input("Enter new end time: "))
+                new_realm = input("Enter new realm: ")
+                new_characters = input("Enter new characters (space separated): ").split()
+                campaign.update_quest_event(new_name, new_start_time, new_end_time, new_realm, new_characters)
+                print("Campaign updated.")

@@ -10,7 +10,7 @@ class Realm:
         Requirement 6: Converts World Clock time to Realm-local time.
         Formula: (WorldTime * Multiplier) + Offset
         """
-        return int((world_minutes * self.multiplier) + self.local_time_offset)
+        return int(world_minutes + self.local_time_offset)
 
     def display_event_time(self, world_minutes, clock_ref):
         """
