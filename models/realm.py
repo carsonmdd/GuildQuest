@@ -1,14 +1,16 @@
 class Realm:
-    def __init__(self, name, offset=0):
+    def __init__(self, realm_id: str, name: str, description: str = '', local_time_offset: int = 0):
+        self.realm_id = realm_id
         self.name = name
-        self.offset = offset          # Fixed minute shift (e.g., -120 for 2 hours behind)
+        self.description = description
+        self.local_time_offset = local_time_offset          # Fixed minute shift (e.g., -120 for 2 hours behind)
 
     def to_local_time(self, world_minutes):
         """
         Requirement 6: Converts World Clock time to Realm-local time.
         Formula: (WorldTime * Multiplier) + Offset
         """
-        return int((world_minutes * self.multiplier) + self.offset)
+        return int((world_minutes * self.multiplier) + self.local_time_offset)
 
     def display_event_time(self, world_minutes, clock_ref):
         """
