@@ -1,7 +1,5 @@
-from main import GuildQuestApp
-
 class CharacterMenu:
-    def __init__(self, app: GuildQuestApp):
+    def __init__(self, app):
         return
     
     def run():

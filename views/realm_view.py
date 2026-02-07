@@ -1,7 +1,5 @@
-from main import GuildQuestApp
-
 class RealmMenu:
-    def __init__(self, app: GuildQuestApp):
+    def __init__(self, app_state):
         return
     
     def run():

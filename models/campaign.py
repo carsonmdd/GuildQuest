@@ -1,13 +1,14 @@
-from clock import WorldClock
-from quest_event import QuestEvent
+from .clock import WorldClock
+from .quest_event import QuestEvent
 
 class Campaign:
     def __init__(self, name: str):
         self.name = name
         self.archived = False
+        self.events = []
 
-    def add_quest_event():
-        return
+    def add_quest_event(self, name, start_time, realm):
+        self.events.append(QuestEvent(name, start_time, realm))
     
     def update_quest_event():
         return

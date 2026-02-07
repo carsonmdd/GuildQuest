@@ -49,7 +49,7 @@ class GuildQuestApp:
 
     def seed_initial_data(self):
         # Quick setup so the game isn't empty on launch
-        tutorial_realm = Realm(name="Sky Haven", offset=0)
+        tutorial_realm = Realm(realm_id='R1', name="Sky Haven", local_time_offset=0)
         self.realms["R1"] = tutorial_realm
         
         starter_campaign = Campaign(name="The First Journey")
