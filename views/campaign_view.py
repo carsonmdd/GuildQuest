@@ -69,8 +69,8 @@ class CampaignMenu:
         name = input("Enter Realm Name: ") 
         start_time = int(input("Event Start Time: "))
         end_time = int(input("Event End Time: "))
-        characters = input("Event Characters (space spearated)").split()
-        realm = next((r for r in self.realms.values() if r.name == name), None)
+        characters = input("Event Characters (space separated): ").split()
+        realm = next((r for r in self.realms if r.name == name), None)
 
         existing_names = {char.name for char in self.user.characters}
         missing = [name for name in characters if name not in existing_names]

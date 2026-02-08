@@ -11,7 +11,7 @@ class GuildQuestApp:
     def __init__(self):
         self.clock = WorldClock()
         self.user = User(1)
-        self.realms = {}
+        self.realms = []
         self.running = True
 
     def display_menu(self):
@@ -35,12 +35,12 @@ class GuildQuestApp:
         if choice == "1":
             CampaignMenu(self.user, self.realms, self.clock).run()
         elif choice == "2":
-            RealmMenu(self.user).run()
+            RealmMenu(self).run()
         elif choice == "3":
             CharacterMenu(self.user).run()
         elif choice == "4":
-            hours = int(input("How many hours to advance? "))
-            self.clock.advance(hours * 60)
+            minutes = int(input("How many minutes to advance? "))
+            self.clock.advance(minutes)
         elif choice == "5":
             self.running = False
         else:
@@ -49,7 +49,7 @@ class GuildQuestApp:
     def seed_initial_data(self):
         # Quick setup so the game isn't empty on launch
         tutorial_realm = Realm(realm_id='R1', name="Sky Haven", local_time_offset=1440)
-        self.realms["R1"] = tutorial_realm
+        self.realms.append(tutorial_realm)
         
         starter_campaign = Campaign(name="The First Journey")
         self.user.campaigns.append(starter_campaign)

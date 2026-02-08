@@ -7,7 +7,7 @@ class WorldClock:
         """Adds time to the world clock."""
         if minutes > 0:
             self.total_minutes += minutes
-            self.update_time_parts()
+            self.day, self.hour, self.minute = self.get_time_parts(self.total_minutes)
 
     def get_time_parts(self, absolute_minutes=None):
         """
