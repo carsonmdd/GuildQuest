@@ -1,41 +1,52 @@
-⚔️ GuildQuest: Text-Based Game Engine
-GuildQuest is a Python-based RPG management engine that allows you to track campaigns, quest events, and characters across multiple realms with unique time-dilation rules.
+# 🛡️ GuildQuest
 
-🛠 Prerequisites
-Language: Python 3.10 or higher
+GuildQuest is a text-based RPG management engine built in Python. It allows users to track game time across multiple Realms, manage Campaigns, and log Quest Events featuring a roster of custom characters.
 
-Libraries: None (Uses standard Python libraries only)
+## 🚀 Environment & Version
 
-🚀 How to Run
-To start the game, navigate to the root directory (the folder containing main.py) and run the following command in your terminal:
+- **Language:** Python 3.10+
+- **Dependencies:** None (Uses standard library only)
+- **Persistence:** None (Current version runs entirely in-memory)
 
-Bash
-python main.py
-🎮 How to Provide Input
-The game uses a Command Line Interface (CLI). Follow these rules for the best experience:
+---
 
-Menu Navigation: Use the keys indicated in the brackets (e.g., 1, 2, a, b) and press Enter.
+## 🕹️ How to Play / Provide Input
 
-Time Entry: When prompted for "World Clock" time, enter the value in total minutes (e.g., 1500 for Day 1, 01:00).
+GuildQuest uses a **Command-Line Interface (CLI)**. When you run `main.py`, you will interact with the program through the following input types:
 
-Character Lists: When adding characters to an event, type their names separated by a single space.
+### 1. Menu Navigation
 
-Example: Aragorn Legolas Gimli
+Menus are navigated using single-character keys followed by the **Enter** key.
 
-Case Sensitivity: Realm names and Character names are case-sensitive. Ensure they match exactly how they were created.
+- **Numbers (1-5):** Select primary menu categories or specific list items.
+- **Letters:** \* `a` - Add/Create
+    - `d` - Delete/Archive
+    - `e` - Edit/Update
+    - `b` - Back (Returns to the previous menu)
 
-📂 Project Structure
-main.py: The entry point and main game loop.
+### 2. Creating Events & Realms
 
-engine/: Logic for the World Clock and core mechanics.
+When prompted for data, follow these formatting rules:
 
-models/: Data definitions for Campaigns, Realms, and Characters.
+- **Names/Titles:** Can include spaces (e.g., `The Dragon's Lair`).
+- **Time:** Enter as a whole number representing total minutes (e.g., `1440` for Day 1).
+- **Characters:** When adding participants to an event, enter names separated by a **single space** (e.g., `Aragorn Gandalf Gimli`).
 
-views/: The terminal UI and menu logic.
+---
 
-💡 A Note on the "World Clock"
-The internal engine tracks time as a single integer (Total Minutes).
+## 📁 Project Structure
 
-1 Day = 1440 minutes.
-
-1 Hour = 60 minutes.
+```text
+guildquest/
+├── main.py              # Application entry point & main loop
+├── engine/
+│   └── clock.py         # World Clock logic (Days/Hours/Minutes)
+├── models/
+│   ├── campaign.py      # Campaign & QuestEvent logic
+│   ├── realm.py         # Realm data & Time Zone rules
+│   └── character.py     # Character stats and classes
+└── views/
+    ├── campaign_view.py # UI for managing quests
+    ├── realm_view.py    # UI for creating world locations
+    └── character_view.py# UI for the character roster
+```
