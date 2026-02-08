@@ -6,7 +6,6 @@ GuildQuest is a text-based RPG management engine built in Python. It allows user
 
 - **Language:** Python 3.10+
 - **Dependencies:** None (Uses standard library only)
-- **Persistence:** None (Current version runs entirely in-memory)
 
 ---
 
@@ -19,9 +18,9 @@ GuildQuest uses a **Command-Line Interface (CLI)**. When you run `main.py`, you 
 Menus are navigated using single-character keys followed by the **Enter** key.
 
 - **Numbers (1-5):** Select primary menu categories or specific list items.
-- **Letters:** \* `a` - Add/Create
-    - `d` - Delete/Archive
-    - `e` - Edit/Update
+- **Letters:** \* `a` - Add
+    - `d` - Delete
+    - `e` - Edit
     - `b` - Back (Returns to the previous menu)
 
 ### 2. Creating Events & Realms
@@ -39,14 +38,15 @@ When prompted for data, follow these formatting rules:
 ```text
 guildquest/
 ├── main.py              # Application entry point & main loop
-├── engine/
-│   └── clock.py         # World Clock logic (Days/Hours/Minutes)
-├── models/
-│   ├── campaign.py      # Campaign & QuestEvent logic
-│   ├── realm.py         # Realm data & Time Zone rules
-│   └── character.py     # Character stats and classes
-└── views/
-    ├── campaign_view.py # UI for managing quests
-    ├── realm_view.py    # UI for creating world locations
-    └── character_view.py# UI for the character roster
+├── models/              # Entity models that follow the UML diagram
+│   ├── campaign.py
+│   ├── realm.py
+│   └── character.py
+│   └── clock.py
+│   └── quest_event.py
+│   └── user.py
+└── views/               # Different views for the text-based UI
+    ├── campaign_view.py
+    ├── realm_view.py
+    └── character_view.py
 ```
