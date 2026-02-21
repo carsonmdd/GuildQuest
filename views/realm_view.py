@@ -38,23 +38,34 @@ class RealmMenu(MenuView):
 
     def delete_realm(self):
         idx_str = input("Enter the number of the Realm to delete: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(self.app.realms):
-                removed = self.app.realms.pop(idx)
-                print(f"Deleted '{removed.name}'.")
-            else:
-                print("Invalid index.")
+        if not idx_str.isdigit():
+            print("Invalid input.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(self.app.realms)):
+            print("Invalid index.")
+            return
+
+        removed = self.app.realms.pop(idx)
+        print(f"Deleted '{removed.name}'.")
 
     def edit_realm(self):
         idx_str = input("Enter the number of the Realm to edit: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(self.app.realms):
-                new_id = input("Enter new realm id: ")
-                new_name = input("Enter new realm name: ")
-                new_desc = input("Enter new realm description: ")
-                self.app.realms[idx].realm_id = new_id
-                self.app.realms[idx].name = new_name
-                self.app.realms[idx].description = new_desc
-                print("Realm updated.")
+        if not idx_str.isdigit():
+            print("Invalid input.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(self.app.realms)):
+            print("Invalid index.")
+            return
+
+        new_id = input("Enter new realm id: ")
+        new_name = input("Enter new realm name: ")
+        new_desc = input("Enter new realm description: ")
+        
+        self.app.realms[idx].realm_id = new_id
+        self.app.realms[idx].name = new_name
+        self.app.realms[idx].description = new_desc
+        print("Realm updated.")

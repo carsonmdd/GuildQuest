@@ -29,7 +29,13 @@ class CharacterMenu(MenuView):
     def add_character(self):
         name = input("Enter new character name: ")
         char_class = input("Enter new character class: ")
-        level = int(input("Enter new character level: "))
+        
+        try:
+            level = int(input("Enter new character level: "))
+        except ValueError:
+            print("Level must be a number.")
+            return
+
         if name:
             from models.character import Character
             new_character = Character(name, char_class, level)
@@ -38,23 +44,34 @@ class CharacterMenu(MenuView):
 
     def delete_character(self):
         idx_str = input("Enter the number of the character to delete: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(self.app.characters):
-                removed = self.app.characters.pop(idx)
-                print(f"Deleted '{removed.name}'.")
-            else:
-                print("Invalid index.")
+        if not idx_str.isdigit():
+            print("Invalid input.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(self.app.characters)):
+            print("Invalid index.")
+            return
+
+        removed = self.app.characters.pop(idx)
+        print(f"Deleted '{removed.name}'.")
 
     def edit_character(self):
         idx_str = input("Enter the number of the character to edit: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(self.app.characters):
-                new_name = input("Enter new name: ")
-                new_class = input("Enter new class: ")
-                new_level = input("Enter new level: ")
-                self.app.characters[idx].name = new_name
-                self.app.characters[idx].char_class = new_class
-                self.app.characters[idx].level = new_level
-                print("Character updated.")
+        if not idx_str.isdigit():
+            print("Invalid input.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(self.app.characters)):
+            print("Invalid index.")
+            return
+
+        new_name = input("Enter new name: ")
+        new_class = input("Enter new class: ")
+        new_level = input("Enter new level: ")
+        
+        self.app.characters[idx].name = new_name
+        self.app.characters[idx].char_class = new_class
+        self.app.characters[idx].level = new_level
+        print("Character updated.")

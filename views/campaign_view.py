@@ -45,22 +45,36 @@ class CampaignMenu(MenuView):
 
     def delete_campaign(self):
         idx_str = input("Enter the number of the campaign to delete: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(self.user.campaigns):
-                removed = self.user.remove_campaign(idx)
-                print(f"Archived '{removed.name}'.")
-            else:
-                print("Invalid index.")
+        if not idx_str.isdigit():
+            print("Invalid input. Please enter a number.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(self.user.campaigns)):
+            print("Invalid index.")
+            return
+
+        removed = self.user.remove_campaign(idx)
+        print(f"Archived '{removed.name}'.")
 
     def edit_campaign(self):
         idx_str = input("Enter the number of the campaign to rename: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(self.user.campaigns):
-                new_name = input("Enter new name: ")
-                self.user.update_campaign(idx, new_name)
-                print("Campaign updated.")
+        if not idx_str.isdigit():
+            print("Invalid input. Please enter a number.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(self.user.campaigns)):
+            print("Invalid index.")
+            return
+
+        new_name = input("Enter new name: ")
+        if not new_name:
+            print("Name cannot be empty.")
+            return
+
+        self.user.update_campaign(idx, new_name)
+        print("Campaign updated.")
 
     def manage_single_campaign(self, index: str):
         campaign = self.user.campaigns[index]
@@ -81,40 +95,64 @@ class CampaignMenu(MenuView):
 
     def add_event(self, campaign: Campaign):
         title = input("Event Title: ")
-        name = input("Enter Realm Name: ") 
-        start_time = int(input("Event Start Time: "))
-        end_time = int(input("Event End Time: "))
-        characters = input("Event Characters (space separated): ").split()
-        realm = next((r for r in self.realms if r.name == name), None)
+        realm_name = input("Enter Realm Name: ") 
+        
+        realm = next((r for r in self.realms if r.name == realm_name), None)
+        if not realm:
+            print(f"Error: Realm '{realm_name}' not found.")
+            return
 
+        try:
+            start_time = int(input("Event Start Time: "))
+            end_time = int(input("Event End Time: "))
+        except ValueError:
+            print("Invalid time format. Please enter numbers.")
+            return
+
+        characters = input("Event Characters (space separated): ").split()
         existing_names = {char.name for char in self.user.characters}
         missing = [name for name in characters if name not in existing_names]
+        
         if missing:
             print(f"Error: The following characters do not exist: {', '.join(missing)}")
             return
         
-        if realm:
-            campaign.add_quest_event(title, realm, start_time, end_time, characters)
+        campaign.add_quest_event(title, realm, start_time, end_time, characters)
 
     def remove_event(self, campaign: Campaign):
         idx_str = input("Enter the number of the event to delete: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(self.user.campaigns):
-                removed = campaign.remove_quest_event(idx)
-                print(f"Deleted '{removed.event_name}'.")
-            else:
-                print("Invalid index.")
+        if not idx_str.isdigit():
+            print("Invalid input.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(campaign.events)):
+            print("Invalid index.")
+            return
+
+        removed = campaign.remove_quest_event(idx)
+        print(f"Deleted '{removed.event_name}'.")
 
     def edit_event(self, campaign: Campaign):
         idx_str = input("Enter the number of the event to edit: ")
-        if idx_str.isdigit():
-            idx = int(idx_str) - 1
-            if 0 <= idx < len(campaign.events):
-                new_name = input("Enter new name: ")
-                new_start_time = int(input("Enter new start time: "))
-                new_end_time = int(input("Enter new end time: "))
-                new_realm = input("Enter new realm: ")
-                new_characters = input("Enter new characters (space separated): ").split()
-                campaign.update_quest_event(new_name, new_start_time, new_end_time, new_realm, new_characters)
-                print("Campaign updated.")
+        if not idx_str.isdigit():
+            print("Invalid input.")
+            return
+
+        idx = int(idx_str) - 1
+        if not (0 <= idx < len(campaign.events)):
+            print("Invalid index.")
+            return
+
+        try:
+            new_name = input("Enter new name: ")
+            new_start_time = int(input("Enter new start time: "))
+            new_end_time = int(input("Enter new end time: "))
+            new_realm_name = input("Enter new realm: ")
+            new_characters = input("Enter new characters (space separated): ").split()
+        except ValueError:
+            print("Invalid input format.")
+            return
+
+        campaign.update_quest_event(idx, new_name, new_start_time, new_end_time, new_realm_name, new_characters)
+        print("Event updated.")
