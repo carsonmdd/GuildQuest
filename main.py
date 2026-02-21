@@ -1,21 +1,15 @@
-from models.clock import WorldClock
-from models.campaign import Campaign
-from models.realm import Realm
+from models.game_facade import GameFacade
 from views.campaign_view import CampaignMenu
 from views.character_view import CharacterMenu
 from views.realm_view import RealmMenu
-from models.user import User
-from models.character import Character
 
 class GuildQuestApp:
     def __init__(self):
-        self.clock = WorldClock()
-        self.user = User(1)
-        self.realms = []
+        self.facade = GameFacade(user_id=1)
         self.running = True
 
     def display_menu(self):
-        print(f"\n--- GuildQuest | World Time: {self.clock.format_time()} ---")
+        print(f"\n--- GuildQuest | World Time: {self.facade.get_world_time_str()} ---")
         print("1. Manage Campaigns & Events")
         print("2. Manage Realms")
         print("3. Manage Characters")
@@ -24,8 +18,6 @@ class GuildQuestApp:
 
     def run(self):
         print("Welcome to GuildQuest!")
-        self.seed_initial_data() 
-
         while self.running:
             self.display_menu()
             choice = input("\nSelect an option: ")
@@ -33,30 +25,21 @@ class GuildQuestApp:
 
     def handle_input(self, choice):
         if choice == "1":
-            CampaignMenu(self.user, self.realms).run()
+            CampaignMenu(self.facade).run()
         elif choice == "2":
-            RealmMenu(self).run()
+            RealmMenu(self.facade).run()
         elif choice == "3":
-            CharacterMenu(self.user).run()
+            CharacterMenu(self.facade).run()
         elif choice == "4":
-            minutes = int(input("How many minutes to advance? "))
-            self.clock.advance(minutes)
+            try:
+                minutes = int(input("How many minutes to advance? "))
+                self.facade.advance_time(minutes)
+            except ValueError:
+                print("Please enter a valid number of minutes.")
         elif choice == "5":
             self.running = False
         else:
             print("Invalid command.")
-
-    def seed_initial_data(self):
-        # Quick setup so the game isn't empty on launch
-        tutorial_realm = Realm(realm_id='R1', name="Sky Haven", local_time_offset=1440)
-        self.realms.append(tutorial_realm)
-        
-        starter_campaign = Campaign(name="The First Journey")
-        self.user.campaigns.append(starter_campaign)
-
-        starting_character = Character('Harold', 'Archer', 15)
-        self.user.characters.append(starting_character)
-        print("System Initialized: Default Realm, Campaign, and Character created.")
 
 if __name__ == "__main__":
     app = GuildQuestApp()

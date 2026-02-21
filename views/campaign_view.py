@@ -1,20 +1,15 @@
-from models.campaign import Campaign
-from models.user import User
-from models.realm import Realm
-from models.clock import WorldClock
 from views.menu_view import MenuView
 
 class CampaignMenu(MenuView):
-    def __init__(self, user: User, realms: Realm):
-        self.user = user
-        self.realms = realms
-        self.clock = WorldClock()
+    def __init__(self, facade):
+        self.facade = facade
 
     def display_header(self):
         print("\n--- Campaign Management ---")
 
     def display_items(self):
-        for i, c in enumerate(self.user.campaigns):
+        campaigns = self.facade.get_campaigns()
+        for i, c in enumerate(campaigns):
             print(f"{i+1}. {c.name} ({len(c.events)} Events)")
 
     def display_options(self):
@@ -32,56 +27,49 @@ class CampaignMenu(MenuView):
             return True
         elif choice.isdigit():
             idx = int(choice) - 1
-            if 0 <= idx < len(self.user.campaigns):
+            campaigns = self.facade.get_campaigns()
+            if 0 <= idx < len(campaigns):
                 self.manage_single_campaign(idx)
                 return True
         return False
 
     def add_campaign(self):
         name = input("Enter new campaign name: ")
-        if name:
-            self.user.add_campaign(name)
+        if self.facade.add_campaign(name):
             print(f"Campaign '{name}' created!")
 
     def delete_campaign(self):
         idx_str = input("Enter the number of the campaign to delete: ")
         if not idx_str.isdigit():
-            print("Invalid input. Please enter a number.")
+            print("Invalid input.")
             return
 
         idx = int(idx_str) - 1
-        if not (0 <= idx < len(self.user.campaigns)):
+        removed = self.facade.delete_campaign(idx)
+        if removed:
+            print(f"Archived '{removed.name}'.")
+        else:
             print("Invalid index.")
-            return
-
-        removed = self.user.remove_campaign(idx)
-        print(f"Archived '{removed.name}'.")
 
     def edit_campaign(self):
         idx_str = input("Enter the number of the campaign to rename: ")
         if not idx_str.isdigit():
-            print("Invalid input. Please enter a number.")
+            print("Invalid input.")
             return
 
         idx = int(idx_str) - 1
-        if not (0 <= idx < len(self.user.campaigns)):
-            print("Invalid index.")
-            return
-
         new_name = input("Enter new name: ")
-        if not new_name:
-            print("Name cannot be empty.")
-            return
+        if self.facade.rename_campaign(idx, new_name):
+            print("Campaign updated.")
+        else:
+            print("Update failed. Check index and name.")
 
-        self.user.update_campaign(idx, new_name)
-        print("Campaign updated.")
-
-    def manage_single_campaign(self, index: str):
-        campaign = self.user.campaigns[index]
+    def manage_single_campaign(self, campaign_index: int):
         while True:
+            campaign = self.facade.get_campaigns()[campaign_index]
             print(f"\n--- {campaign.name} ---")
             for i, ev in enumerate(campaign.events):
-                world_t = self.clock.format_time(ev.start_time)
+                world_t = self.facade.clock.format_time(ev.start_time)
                 local_t = ev.realm.display_event_time(ev.start_time)
                 print(f"  {i+1}. {ev.event_name} [{ev.realm.name}]")
                 print(f"     Time: {world_t} (Local: {local_t})")
@@ -89,23 +77,9 @@ class CampaignMenu(MenuView):
             print("\na. Add Event | r. Remove | e. Edit | b. Back")
             choice = input(">> ").lower()
             if choice == 'b': break
-            elif choice == 'a': self.add_event(campaign)
-            elif choice == 'r': self.remove_event(campaign)
-            elif choice == 'e': self.edit_event(campaign)
-
-    def _get_realm_by_name(self, name: str):
-        realm = next((r for r in self.realms if r.name == name), None)
-        if not realm:
-            print(f"Error: Realm '{name}' not found.")
-        return realm
-
-    def _validate_characters(self, char_names: list):
-        existing_names = {char.name for char in self.user.characters}
-        missing = [name for name in char_names if name not in existing_names]
-        if missing:
-            print(f"Error: The following characters do not exist: {', '.join(missing)}")
-            return False
-        return True
+            elif choice == 'a': self.add_event(campaign_index)
+            elif choice == 'r': self.remove_event(campaign_index)
+            elif choice == 'e': self.edit_event(campaign_index)
 
     def _prompt_for_event_data(self):
         try:
@@ -119,45 +93,40 @@ class CampaignMenu(MenuView):
             print("Invalid input format. Times must be numbers.")
             return None
 
-    def add_event(self, campaign: Campaign):
+    def add_event(self, campaign_index: int):
         data = self._prompt_for_event_data()
         if not data: return
         
-        title, realm_name, start, end, chars = data
-        realm = self._get_realm_by_name(realm_name)
-        
-        if realm and self._validate_characters(chars):
-            campaign.add_quest_event(title, realm, start, end, chars)
-            print(f"Event '{title}' added to {campaign.name}.")
+        success, message = self.facade.add_event_to_campaign(campaign_index, *data)
+        print(message)
 
-    def remove_event(self, campaign: Campaign):
+    def remove_event(self, campaign_index: int):
         idx_str = input("Enter the number of the event to delete: ")
         if not idx_str.isdigit():
             print("Invalid input.")
             return
 
         idx = int(idx_str) - 1
-        if not (0 <= idx < len(campaign.events)):
+        removed = self.facade.remove_event_from_campaign(campaign_index, idx)
+        if removed:
+            print(f"Deleted '{removed.event_name}'.")
+        else:
             print("Invalid index.")
-            return
 
-        removed = campaign.remove_quest_event(idx)
-        print(f"Deleted '{removed.event_name}'.")
-
-    def edit_event(self, campaign: Campaign):
+    def edit_event(self, campaign_index: int):
         idx_str = input("Enter the number of the event to edit: ")
         if not idx_str.isdigit():
             print("Invalid input.")
             return
 
         idx = int(idx_str) - 1
-        if not (0 <= idx < len(campaign.events)):
-            print("Invalid index.")
-            return
-
         data = self._prompt_for_event_data()
         if not data: return
 
         title, realm_name, start, end, chars = data
-        campaign.update_quest_event(idx, title, start, end, realm_name, chars)
-        print("Event updated.")
+        campaign = self.facade.get_campaigns()[campaign_index]
+        if 0 <= idx < len(campaign.events):
+            campaign.update_quest_event(idx, title, start, end, realm_name, chars)
+            print("Event updated.")
+        else:
+            print("Invalid index.")

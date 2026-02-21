@@ -1,14 +1,15 @@
 from views.menu_view import MenuView
 
 class RealmMenu(MenuView):
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, facade):
+        self.facade = facade
 
     def display_header(self):
         print("\n--- Realm Management ---")
 
     def display_items(self):
-        for i, r in enumerate(self.app.realms):
+        realms = self.facade.get_realms()
+        for i, r in enumerate(realms):
             print(f"{i+1}. {r.name}, {r.description}")
 
     def display_options(self):
@@ -27,13 +28,11 @@ class RealmMenu(MenuView):
         return False
 
     def add_realm(self):
-        id = input("Enter new realm id: ")
+        realm_id = input("Enter new realm id: ")
         name = input("Enter new realm name: ")
         desc = input("Enter new realm description: ")
         if name:
-            from models.realm import Realm
-            new_realm = Realm(id, name, desc)
-            self.app.realms.append(new_realm)
+            self.facade.add_realm(realm_id, name, desc)
             print(f"Realm '{name}' created!")
 
     def delete_realm(self):
@@ -43,12 +42,12 @@ class RealmMenu(MenuView):
             return
 
         idx = int(idx_str) - 1
-        if not (0 <= idx < len(self.app.realms)):
+        realms = self.facade.get_realms()
+        if 0 <= idx < len(realms):
+            removed = realms.pop(idx)
+            print(f"Deleted '{removed.name}'.")
+        else:
             print("Invalid index.")
-            return
-
-        removed = self.app.realms.pop(idx)
-        print(f"Deleted '{removed.name}'.")
 
     def edit_realm(self):
         idx_str = input("Enter the number of the Realm to edit: ")
@@ -57,7 +56,8 @@ class RealmMenu(MenuView):
             return
 
         idx = int(idx_str) - 1
-        if not (0 <= idx < len(self.app.realms)):
+        realms = self.facade.get_realms()
+        if not (0 <= idx < len(realms)):
             print("Invalid index.")
             return
 
@@ -65,7 +65,7 @@ class RealmMenu(MenuView):
         new_name = input("Enter new realm name: ")
         new_desc = input("Enter new realm description: ")
         
-        self.app.realms[idx].realm_id = new_id
-        self.app.realms[idx].name = new_name
-        self.app.realms[idx].description = new_desc
+        realms[idx].realm_id = new_id
+        realms[idx].name = new_name
+        realms[idx].description = new_desc
         print("Realm updated.")
