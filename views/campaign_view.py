@@ -5,10 +5,10 @@ from models.clock import WorldClock
 from views.menu_view import MenuView
 
 class CampaignMenu(MenuView):
-    def __init__(self, user: User, realms: Realm, clock: WorldClock):
+    def __init__(self, user: User, realms: Realm):
         self.user = user
         self.realms = realms
-        self.clock = clock
+        self.clock = WorldClock()
 
     def display_header(self):
         print("\n--- Campaign Management ---")
@@ -68,7 +68,7 @@ class CampaignMenu(MenuView):
             print(f"\n--- {campaign.name} ---")
             for i, ev in enumerate(campaign.events):
                 world_t = self.clock.format_time(ev.start_time)
-                local_t = ev.realm.display_event_time(ev.start_time, self.clock)
+                local_t = ev.realm.display_event_time(ev.start_time)
                 print(f"  {i+1}. {ev.event_name} [{ev.realm.name}]")
                 print(f"     Time: {world_t} (Local: {local_t})")
 

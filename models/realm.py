@@ -12,10 +12,12 @@ class Realm:
         """
         return int(world_minutes + self.local_time_offset)
 
-    def display_event_time(self, world_minutes, clock_ref):
+    def display_event_time(self, world_minutes):
         """
         Helper to format the time using the WorldClock's formatting logic 
         but with the Realm's local calculation.
         """
+        from models.clock import WorldClock
+        clock = WorldClock()
         local_total = self.to_local_time(world_minutes)
-        return clock_ref.format_time(local_total)
+        return clock.format_time(local_total)

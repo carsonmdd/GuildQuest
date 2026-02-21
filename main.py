@@ -33,7 +33,7 @@ class GuildQuestApp:
 
     def handle_input(self, choice):
         if choice == "1":
-            CampaignMenu(self.user, self.realms, self.clock).run()
+            CampaignMenu(self.user, self.realms).run()
         elif choice == "2":
             RealmMenu(self).run()
         elif choice == "3":

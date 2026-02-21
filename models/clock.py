@@ -1,7 +1,18 @@
 class WorldClock:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(WorldClock, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
     def __init__(self, initial_minutes=0):
+        if self._initialized:
+            return
         self.total_minutes = initial_minutes
         self.day, self.hour, self.minute = self.get_time_parts(initial_minutes)
+        self._initialized = True
 
     def advance(self, minutes):
         """Adds time to the world clock."""
@@ -27,8 +38,3 @@ class WorldClock:
         """Returns a readable string: 'Day 2, 14:30'"""
         d, h, m = self.get_time_parts(absolute_minutes)
         return f"Day {d}, {h:02d}:{m:02d}"
-    
-    
-if __name__ == '__main__':
-    clock = WorldClock(3780)
-    print(clock.format_time())
