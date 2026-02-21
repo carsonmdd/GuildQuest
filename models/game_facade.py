@@ -21,10 +21,9 @@ class GameFacade:
         self.realms.append(tutorial_realm)
         
         starter_campaign = Campaign(name="The First Journey")
-        self.user.campaigns.append(starter_campaign)
+        self.user.add_campaign("The First Journey")
 
-        starting_character = Character('Harold', 'Archer', 15)
-        self.user.characters.append(starting_character)
+        self.add_character('Harold', 'Archer', 15)
 
     # --- Time Management ---
     def get_world_time_str(self):
@@ -35,7 +34,7 @@ class GameFacade:
 
     # --- Campaign Management ---
     def get_campaigns(self):
-        return self.user.campaigns
+        return self.user.get_campaigns()
 
     def add_campaign(self, name: str):
         if name:
@@ -44,19 +43,18 @@ class GameFacade:
         return False
 
     def delete_campaign(self, index: int):
-        if 0 <= index < len(self.user.campaigns):
-            return self.user.remove_campaign(index)
-        return None
+        return self.user.remove_campaign(index)
 
     def rename_campaign(self, index: int, new_name: str):
-        if 0 <= index < len(self.user.campaigns) and new_name:
+        if new_name:
             self.user.update_campaign(index, new_name)
             return True
         return False
 
     # --- Event Management ---
     def add_event_to_campaign(self, campaign_index, title, realm_name, start, end, char_names):
-        if not (0 <= campaign_index < len(self.user.campaigns)):
+        campaigns = self.user.get_campaigns()
+        if not (0 <= campaign_index < len(campaigns)):
             return False, "Invalid campaign index."
 
         realm = self.get_realm_by_name(realm_name)
@@ -66,15 +64,15 @@ class GameFacade:
         if not self.validate_characters(char_names):
             return False, "One or more characters do not exist."
 
-        campaign = self.user.campaigns[campaign_index]
+        campaign = campaigns[campaign_index]
         campaign.add_quest_event(title, realm, start, end, char_names)
         return True, "Event added successfully."
 
     def remove_event_from_campaign(self, campaign_index, event_index):
-        if 0 <= campaign_index < len(self.user.campaigns):
-            campaign = self.user.campaigns[campaign_index]
-            if 0 <= event_index < len(campaign.events):
-                return campaign.remove_quest_event(event_index)
+        campaigns = self.user.get_campaigns()
+        if 0 <= campaign_index < len(campaigns):
+            campaign = campaigns[campaign_index]
+            return campaign.remove_quest_event(event_index)
         return None
 
     # --- Realm & Character Lookups ---
@@ -85,10 +83,10 @@ class GameFacade:
         return next((r for r in self.realms if r.name == name), None)
 
     def get_characters(self):
-        return self.user.characters
+        return self.user.get_characters()
 
     def validate_characters(self, char_names: list):
-        existing_names = {char.name for char in self.user.characters}
+        existing_names = {char.name for char in self.user.get_characters()}
         return all(name in existing_names for name in char_names)
 
     def add_realm(self, realm_id, name, desc):
@@ -98,5 +96,5 @@ class GameFacade:
 
     def add_character(self, name, char_class, level):
         new_char = Character(name, char_class, level)
-        self.user.characters.append(new_char)
+        self.user._characters.append(new_char) 
         return new_char
