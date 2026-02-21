@@ -35,7 +35,7 @@ class GameFacade:
 
     # --- Campaign Management ---
     def get_campaigns(self):
-        return self.user.get_campaigns()
+        return self.user.campaigns
 
     def add_campaign(self, name: str):
         if name:
@@ -44,18 +44,19 @@ class GameFacade:
         return False
 
     def delete_campaign(self, index: int):
-        return self.user.remove_campaign(index)
+        if 0 <= index < len(self.user.campaigns):
+            return self.user.remove_campaign(index)
+        return None
 
     def rename_campaign(self, index: int, new_name: str):
-        if new_name:
+        if 0 <= index < len(self.user.campaigns) and new_name:
             self.user.update_campaign(index, new_name)
             return True
         return False
 
     # --- Event Management ---
     def add_event_to_campaign(self, campaign_index, title, realm_name, start, end, char_names):
-        campaigns = self.user.get_campaigns()
-        if not (0 <= campaign_index < len(campaigns)):
+        if not (0 <= campaign_index < len(self.user.campaigns)):
             return False, "Invalid campaign index."
 
         realm = self.get_realm_by_name(realm_name)
@@ -65,15 +66,15 @@ class GameFacade:
         if not self.validate_characters(char_names):
             return False, "One or more characters do not exist."
 
-        campaign = campaigns[campaign_index]
+        campaign = self.user.campaigns[campaign_index]
         campaign.add_quest_event(title, realm, start, end, char_names)
         return True, "Event added successfully."
 
     def remove_event_from_campaign(self, campaign_index, event_index):
-        campaigns = self.user.get_campaigns()
-        if 0 <= campaign_index < len(campaigns):
-            campaign = campaigns[campaign_index]
-            return campaign.remove_quest_event(event_index)
+        if 0 <= campaign_index < len(self.user.campaigns):
+            campaign = self.user.campaigns[campaign_index]
+            if 0 <= event_index < len(campaign.events):
+                return campaign.remove_quest_event(event_index)
         return None
 
     # --- Realm & Character Lookups ---
@@ -84,10 +85,10 @@ class GameFacade:
         return next((r for r in self.realms if r.name == name), None)
 
     def get_characters(self):
-        return self.user.get_characters()
+        return self.user.characters
 
     def validate_characters(self, char_names: list):
-        existing_names = {char.name for char in self.user.get_characters()}
+        existing_names = {char.name for char in self.user.characters}
         return all(name in existing_names for name in char_names)
 
     def add_realm(self, realm_id, name, desc):
@@ -97,6 +98,5 @@ class GameFacade:
 
     def add_character(self, name, char_class, level):
         new_char = Character(name, char_class, level)
-        # Note: Facade still has Feature Envy here; User should have an add_character method
-        self.user._characters.append(new_char) 
+        self.user.characters.append(new_char)
         return new_char

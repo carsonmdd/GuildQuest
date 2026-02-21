@@ -68,8 +68,7 @@ class CampaignMenu(MenuView):
         while True:
             campaign = self.facade.get_campaigns()[campaign_index]
             print(f"\n--- {campaign.name} ---")
-            events = campaign.get_events()
-            for i, ev in enumerate(events):
+            for i, ev in enumerate(campaign.events):
                 world_t = self.facade.clock.format_time(ev.start_time)
                 local_t = ev.realm.display_event_time(ev.start_time)
                 print(f"  {i+1}. {ev.event_name} [{ev.realm.name}]")
