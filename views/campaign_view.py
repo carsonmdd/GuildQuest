@@ -93,31 +93,42 @@ class CampaignMenu(MenuView):
             elif choice == 'r': self.remove_event(campaign)
             elif choice == 'e': self.edit_event(campaign)
 
-    def add_event(self, campaign: Campaign):
-        title = input("Event Title: ")
-        realm_name = input("Enter Realm Name: ") 
-        
-        realm = next((r for r in self.realms if r.name == realm_name), None)
+    def _get_realm_by_name(self, name: str):
+        realm = next((r for r in self.realms if r.name == name), None)
         if not realm:
-            print(f"Error: Realm '{realm_name}' not found.")
-            return
+            print(f"Error: Realm '{name}' not found.")
+        return realm
 
-        try:
-            start_time = int(input("Event Start Time: "))
-            end_time = int(input("Event End Time: "))
-        except ValueError:
-            print("Invalid time format. Please enter numbers.")
-            return
-
-        characters = input("Event Characters (space separated): ").split()
+    def _validate_characters(self, char_names: list):
         existing_names = {char.name for char in self.user.characters}
-        missing = [name for name in characters if name not in existing_names]
-        
+        missing = [name for name in char_names if name not in existing_names]
         if missing:
             print(f"Error: The following characters do not exist: {', '.join(missing)}")
-            return
+            return False
+        return True
+
+    def _prompt_for_event_data(self):
+        try:
+            title = input("Event Title: ")
+            realm_name = input("Enter Realm Name: ")
+            start_time = int(input("Event Start Time: "))
+            end_time = int(input("Event End Time: "))
+            characters = input("Event Characters (space separated): ").split()
+            return title, realm_name, start_time, end_time, characters
+        except ValueError:
+            print("Invalid input format. Times must be numbers.")
+            return None
+
+    def add_event(self, campaign: Campaign):
+        data = self._prompt_for_event_data()
+        if not data: return
         
-        campaign.add_quest_event(title, realm, start_time, end_time, characters)
+        title, realm_name, start, end, chars = data
+        realm = self._get_realm_by_name(realm_name)
+        
+        if realm and self._validate_characters(chars):
+            campaign.add_quest_event(title, realm, start, end, chars)
+            print(f"Event '{title}' added to {campaign.name}.")
 
     def remove_event(self, campaign: Campaign):
         idx_str = input("Enter the number of the event to delete: ")
@@ -144,15 +155,9 @@ class CampaignMenu(MenuView):
             print("Invalid index.")
             return
 
-        try:
-            new_name = input("Enter new name: ")
-            new_start_time = int(input("Enter new start time: "))
-            new_end_time = int(input("Enter new end time: "))
-            new_realm_name = input("Enter new realm: ")
-            new_characters = input("Enter new characters (space separated): ").split()
-        except ValueError:
-            print("Invalid input format.")
-            return
+        data = self._prompt_for_event_data()
+        if not data: return
 
-        campaign.update_quest_event(idx, new_name, new_start_time, new_end_time, new_realm_name, new_characters)
+        title, realm_name, start, end, chars = data
+        campaign.update_quest_event(idx, title, start, end, realm_name, chars)
         print("Event updated.")
