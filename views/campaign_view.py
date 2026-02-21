@@ -10,7 +10,7 @@ class CampaignMenu(MenuView):
     def display_items(self):
         campaigns = self.facade.get_campaigns()
         for i, c in enumerate(campaigns):
-            print(f"{i+1}. {c.name} ({len(c.events)} Events)")
+            print(f"{i+1}. {c.name} ({len(c.get_events())} Events)")
 
     def display_options(self):
         print("a. Add Campaign | d. Delete | e. Edit | b. Back")
@@ -68,7 +68,7 @@ class CampaignMenu(MenuView):
         while True:
             campaign = self.facade.get_campaigns()[campaign_index]
             print(f"\n--- {campaign.name} ---")
-            for i, ev in enumerate(campaign.events):
+            for i, ev in enumerate(campaign.get_events()):
                 world_t = self.facade.clock.format_time(ev.start_time)
                 local_t = ev.realm.display_event_time(ev.start_time)
                 print(f"  {i+1}. {ev.event_name} [{ev.realm.name}]")
@@ -125,7 +125,7 @@ class CampaignMenu(MenuView):
 
         title, realm_name, start, end, chars = data
         campaign = self.facade.get_campaigns()[campaign_index]
-        if 0 <= idx < len(campaign.events):
+        if 0 <= idx < len(campaign.get_events()):
             campaign.update_quest_event(idx, title, start, end, realm_name, chars)
             print("Event updated.")
         else:
