@@ -2,25 +2,40 @@ from models.campaign import Campaign
 from models.user import User
 from models.realm import Realm
 from models.clock import WorldClock
-class CampaignMenu:
+from views.menu_view import MenuView
+
+class CampaignMenu(MenuView):
     def __init__(self, user: User, realms: Realm, clock: WorldClock):
         self.user = user
         self.realms = realms
         self.clock = clock
 
-    def run(self):
-        while True:
-            print("\n--- Campaign Management ---")
-            for i, c in enumerate(self.user.campaigns):
-                print(f"{i+1}. {c.name} ({len(c.events)} Events)")
-            print("a. Add Campaign | d. Delete | e. Edit | b. Back")
-            
-            choice = input(">> ").lower()
-            if choice == 'b': break
-            elif choice == 'a': self.add_campaign()
-            elif choice == 'd': self.delete_campaign()
-            elif choice == 'e': self.edit_campaign()
-            elif choice.isdigit(): self.manage_single_campaign(int(choice)-1)
+    def display_header(self):
+        print("\n--- Campaign Management ---")
+
+    def display_items(self):
+        for i, c in enumerate(self.user.campaigns):
+            print(f"{i+1}. {c.name} ({len(c.events)} Events)")
+
+    def display_options(self):
+        print("a. Add Campaign | d. Delete | e. Edit | b. Back")
+
+    def handle_choice(self, choice: str) -> bool:
+        if choice == 'a':
+            self.add_campaign()
+            return True
+        elif choice == 'd':
+            self.delete_campaign()
+            return True
+        elif choice == 'e':
+            self.edit_campaign()
+            return True
+        elif choice.isdigit():
+            idx = int(choice) - 1
+            if 0 <= idx < len(self.user.campaigns):
+                self.manage_single_campaign(idx)
+                return True
+        return False
 
     def add_campaign(self):
         name = input("Enter new campaign name: ")

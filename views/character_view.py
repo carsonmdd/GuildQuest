@@ -1,19 +1,30 @@
-class CharacterMenu:
+from views.menu_view import MenuView
+
+class CharacterMenu(MenuView):
     def __init__(self, app):
         self.app = app
 
-    def run(self):
-        while True:
-            print("\n--- Character Management ---")
-            for i, c in enumerate(self.app.characters):
-                print(f"{i+1}. {c.name}, {c.char_class}, {c.level}")
-            print("a. Add Character | d. Delete | e. Edit | b. Back")
-            
-            choice = input(">> ").lower()
-            if choice == 'b': break
-            elif choice == 'a': self.add_character()
-            elif choice == 'd': self.delete_character()
-            elif choice == 'e': self.edit_character()
+    def display_header(self):
+        print("\n--- Character Management ---")
+
+    def display_items(self):
+        for i, c in enumerate(self.app.characters):
+            print(f"{i+1}. {c.name}, {c.char_class}, {c.level}")
+
+    def display_options(self):
+        print("a. Add Character | d. Delete | e. Edit | b. Back")
+
+    def handle_choice(self, choice: str) -> bool:
+        if choice == 'a':
+            self.add_character()
+            return True
+        elif choice == 'd':
+            self.delete_character()
+            return True
+        elif choice == 'e':
+            self.edit_character()
+            return True
+        return False
 
     def add_character(self):
         name = input("Enter new character name: ")
@@ -29,8 +40,8 @@ class CharacterMenu:
         idx_str = input("Enter the number of the character to delete: ")
         if idx_str.isdigit():
             idx = int(idx_str) - 1
-            if 0 <= idx < len(self.app.character):
-                removed = self.app.character.pop(idx)
+            if 0 <= idx < len(self.app.characters):
+                removed = self.app.characters.pop(idx)
                 print(f"Deleted '{removed.name}'.")
             else:
                 print("Invalid index.")

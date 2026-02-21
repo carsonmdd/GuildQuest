@@ -1,19 +1,30 @@
-class RealmMenu:
+from views.menu_view import MenuView
+
+class RealmMenu(MenuView):
     def __init__(self, app):
         self.app = app
 
-    def run(self):
-        while True:
-            print("\n--- Realm Management ---")
-            for i, r in enumerate(self.app.realms):
-                print(f"{i+1}. {r.name}, {r.description}")
-            print("a. Add Realm | d. Delete | e. Edit | b. Back")
-            
-            choice = input(">> ").lower()
-            if choice == 'b': break
-            elif choice == 'a': self.add_realm()
-            elif choice == 'd': self.delete_realm()
-            elif choice == 'e': self.edit_realm()
+    def display_header(self):
+        print("\n--- Realm Management ---")
+
+    def display_items(self):
+        for i, r in enumerate(self.app.realms):
+            print(f"{i+1}. {r.name}, {r.description}")
+
+    def display_options(self):
+        print("a. Add Realm | d. Delete | e. Edit | b. Back")
+
+    def handle_choice(self, choice: str) -> bool:
+        if choice == 'a':
+            self.add_realm()
+            return True
+        elif choice == 'd':
+            self.delete_realm()
+            return True
+        elif choice == 'e':
+            self.edit_realm()
+            return True
+        return False
 
     def add_realm(self):
         id = input("Enter new realm id: ")
